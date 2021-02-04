@@ -1,24 +1,14 @@
-import request from '@/utils/request'
+import * as api from '@/utils/api' 
 
 export function login(data) {
-  return request({
-    url: '/login',
-    method: 'post',
-    data
-  })
+
+  return api.postFormRequest('/login',data)
 }
 
 export function getInfo(token) {
-  return request({
-    url: '/vue-admin-template/user/info',
-    method: 'get',
-    params: { token }
-  })
+  return api.request('/sys/userinfo',{ token })
 }
 
 export function logout() {
-  return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
-  })
+  return api.request('/sys/user/logout')
 }

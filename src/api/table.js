@@ -1,7 +1,7 @@
-import request from '@/utils/request'
+import * as api from '@/utils/api' 
 
 export function getList(params) {
-  return request({
+  return api.request({
     url: '/vue-admin-template/table/list',
     method: 'get',
     params
