@@ -1,4 +1,5 @@
 import router from './router'
+import {resetRouter} from './router'
 import store from './store'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
@@ -8,7 +9,7 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login'] // no redirect whitelist
+const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
   // start progress bar
@@ -16,7 +17,7 @@ router.beforeEach(async(to, from, next) => {
 
   // set page title
   document.title = getPageTitle(to.meta.title)
-
+  
   // determine whether the user has logged in
   const hasToken = getToken()
 
@@ -26,15 +27,25 @@ router.beforeEach(async(to, from, next) => {
       next({ path: '/' })
       NProgress.done()
     } else {
-      const hasGetUserInfo = store.getters.name
-      if (hasGetUserInfo) {
+      const hasRoles = store.getters.roles && store.getters.roles.length > 0
+      if (hasRoles) {
         next()
       } else {
+       
         try {
           // get user info
-          await store.dispatch('user/getInfo')
+          const { menus } =   await store.dispatch('user/getInfo')
 
-          next()
+          // generate accessible routes map based on roles
+          const accessRoutes = await store.dispatch('permission/generateRoutes', menus)
+
+          // dynamically add accessible routes
+          resetRouter()
+          router.addRoutes(accessRoutes)
+         
+          // hack method to ensure that addRoutes is complete
+          // set the replace: true, so the navigation will not leave a history record
+          next({ ...to, replace: true })
         } catch (error) {
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')

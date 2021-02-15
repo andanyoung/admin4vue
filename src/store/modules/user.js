@@ -1,13 +1,15 @@
 import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
+import { cacheMenus } from '@/utils/menus'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: ''
+    roles: [],
+    menus:[]
   }
 }
 
@@ -28,6 +30,10 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_MENUS: (state, menus) => {
+    state.menus = menus
+    cacheMenus(menus)
   }
 }
 
@@ -57,11 +63,13 @@ const actions = {
           return reject('Verification failed, please Login again.')
         }
 
-        const { name, avatarUrl,roles} = data
+        const { name, avatarUrl,roles,menus} = data
 
         commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatarUrl)
+        commit('SET_MENUS', menus)
+        
         resolve(data)
       }).catch(error => {
         reject(error)
