@@ -10,5 +10,5 @@ export function getInfo(token) {
 }
 
 export function logout() {
-  return api.request('/sys/user/logout')
+  return api.request('/sys/logout')
 }
